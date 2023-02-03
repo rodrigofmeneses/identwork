@@ -1,8 +1,7 @@
-export interface Repository<T, K> {
+export interface Service<T, K> {
   readAll(): Promise<T[]>;
   read(id: K): Promise<T>;
   create(entity: T): Promise<T>;
-  save(entity: T): Promise<T>;
-  update(id: K, entity: Partial<T>): Promise<T>;
+  update(id: K, entity: T): Promise<T>;
   delete(id: K): Promise<T>;
 }

@@ -4,7 +4,7 @@ export interface CompanyProps {
 }
 
 export class Company {
-  private props: CompanyProps
+  props: CompanyProps
 
   constructor(props: CompanyProps) {
     this.props = props
