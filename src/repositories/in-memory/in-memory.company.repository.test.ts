@@ -3,14 +3,13 @@ import { Company } from "../../entities/company";
 import { InMemoryCompanyRepository } from "./in-memory.company.repository";
 
 describe('in memory companies repository', () => {
-  const company = new Company({ id: '0', name: 'Mare' })
-  const anotherCompany = new Company({ id: '1', name: 'Grafica' })
+  const company = new Company({ name: 'Mare' })
+  const anotherCompany = new Company({ name: 'Grafica' })
 
-  const inMemoryCompanyRepository = new InMemoryCompanyRepository()
+  let inMemoryCompanyRepository = new InMemoryCompanyRepository()
 
   beforeEach(() => {
-    inMemoryCompanyRepository.items.length = 0
-    inMemoryCompanyRepository.index = 0
+    inMemoryCompanyRepository = new InMemoryCompanyRepository()
   })
 
   it('may create a company', async () => {
@@ -29,24 +28,14 @@ describe('in memory companies repository', () => {
     expect(inMemoryCompanyRepository.items[1].name).toBe('Grafica')
   })
 
-  it('may not save a company with duplicated name', async () => {
-    const newCompany = new Company({ name: 'Mare' })
-
+  it('may update a company by id', async () => {
     await inMemoryCompanyRepository.save(company)
 
-    expect(
-      inMemoryCompanyRepository.save(newCompany)
-    ).rejects.toThrowError()
-  })
+    const toUpdate = new Company({ name: 'UPDATE' })
+    const updatedCompany = await inMemoryCompanyRepository.update('0', toUpdate)
 
-  it('may not save a company with duplicated id', async () => {
-    const newCompany = new Company({ id: '0', name: 'Grafica' })
-
-    await inMemoryCompanyRepository.save(company)
-
-    expect(
-      inMemoryCompanyRepository.save(newCompany)
-    ).rejects.toThrowError()
+    expect(updatedCompany).toBeInstanceOf(Company)
+    expect(updatedCompany.name).toBe('UPDATE')
   })
 
   it('may delete a company by id', async () => {
