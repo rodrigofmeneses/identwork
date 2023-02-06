@@ -1,24 +1,5 @@
-export interface CompanyProps {
+
+export interface Company {
   id?: string
   name: string
-}
-
-export class Company {
-  props: CompanyProps
-
-  constructor(props: CompanyProps) {
-    this.props = props
-  }
-
-  set id(value) {
-    this.props.id = value
-  }
-
-  get id() {
-    return this.props.id
-  }
-
-  get name() {
-    return this.props.name
-  }
 }

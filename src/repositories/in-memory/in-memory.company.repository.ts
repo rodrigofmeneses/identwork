@@ -1,5 +1,6 @@
 import { Company } from "../../entities/company";
 import { CompanyRepository } from "../company.repository";
+import { NotFoundError } from "../error/NotFoundError";
 
 export class InMemoryCompanyRepository implements CompanyRepository {
   public items: Company[] = []
@@ -8,7 +9,7 @@ export class InMemoryCompanyRepository implements CompanyRepository {
   private findById(id: string): Company {
     const company = this.items.find(item => item.id === id)
     if (!company) {
-      throw new Error('Company not found')
+      throw new NotFoundError()
     }
     return company
   }
@@ -31,10 +32,10 @@ export class InMemoryCompanyRepository implements CompanyRepository {
   async update(id: string, company: Partial<Company>): Promise<Company> {
     const companyDatabase = this.findById(id)
     const index = this.items.indexOf(companyDatabase)
-    const updatedCompany = new Company({ ...companyDatabase.props, ...company.props })
-    this.items[index] = updatedCompany
+    const result = { ...companyDatabase, ...company }
+    this.items[index] = result
 
-    return updatedCompany
+    return result
   }
 
   async delete(id: string): Promise<Company> {
