@@ -1,60 +1,131 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, test } from "vitest";
 import { Company } from "../entities/company";
+import { makeFakeCompany } from "../entities/mocks/company";
 import { InMemoryCompanyRepository } from "../repositories/in-memory/in-memory.company.repository";
 import { CompanyService } from "./company.service";
+import { CompanyNotFoundError } from "./errors/CompanyNotFoundError";
+import { DuplicatedCompanyError } from "./errors/DuplicatedCompanyError";
+
+const makeSut = () => {
+  const sut = new CompanyService(new InMemoryCompanyRepository())
+
+  return { sut };
+}
 
 describe('Company Service', () => {
-  let companyService = new CompanyService(new InMemoryCompanyRepository())
+  describe('when adding company', () => {
+    describe('should add company in repository', () => {
+      test('when success', async () => {
+        const { sut } = makeSut();
+        const company = makeFakeCompany()
+        const anotherCompany = makeFakeCompany({ name: 'Gráfica' })
 
-  const company = new Company({ name: 'Mare' })
-  const anotherCompany = new Company({ name: 'Grafica' })
+        await sut.create(company)
+        await sut.create(anotherCompany)
 
-  beforeEach(() => {
-    companyService = new CompanyService(new InMemoryCompanyRepository())
+        expect(sut.readAll()).resolves.toBeInstanceOf(Array<Company>)
+        expect((await sut.readAll()).length).toBe(2)
+      })
+
+      test('should be not able to create a company with duplicated name', async () => {
+        const { sut } = makeSut()
+        const company = makeFakeCompany()
+        const duplicatedCompany = makeFakeCompany()
+
+        await sut.create(company)
+
+        expect(() => sut.create(duplicatedCompany)).rejects.toThrow(new DuplicatedCompanyError())
+      })
+    })
   })
 
-  it('should be able to create a company', () => {
+  describe('when read companies', () => {
+    describe('should list all companies', () => {
+      test('when success', async () => {
+        const { sut } = makeSut()
+        const company = makeFakeCompany()
+        const anotherCompany = makeFakeCompany({ name: 'Gráfica' })
+        await sut.create(company)
+        await sut.create(anotherCompany)
 
-    expect(companyService.create(company)).resolves.toBeInstanceOf(Company)
-    expect(companyService.create(anotherCompany)).resolves.toBeInstanceOf(Company)
+        const result = await sut.readAll()
+
+        expect(result.length).toBe(2)
+      })
+
+      test('when there is no company', async () => {
+        const { sut } = makeSut()
+
+        const result = await sut.readAll()
+
+        expect(result.length).toBe(0)
+      })
+    })
+
+    describe('should list a company by id', () => {
+      test('when success', async () => {
+        const { sut } = makeSut()
+        const company = makeFakeCompany()
+        const anotherCompany = makeFakeCompany({ name: 'Gráfica' })
+
+        await sut.create(company)
+        await sut.create(anotherCompany)
+
+        const result = await sut.read(anotherCompany.id as string)
+
+        expect(result).toBe(anotherCompany)
+      })
+
+      test('when has no company or id', async () => {
+        const { sut } = makeSut()
+        const fakeId = '999'
+
+        expect(() => sut.read(fakeId)).rejects.toThrow(new CompanyNotFoundError())
+      })
+    })
   })
 
-  it('should be not able to create a company with duplicated name', async () => {
+  describe('when update company', () => {
+    describe('should update company', () => {
+      test('when success', async () => {
+        const { sut } = makeSut()
+        const company = makeFakeCompany()
+        const toUpdate = { name: 'Updated' }
+        await sut.create(company)
 
-    const duplicatedCompany = new Company({ name: 'Mare' })
+        const result = await sut.update(company.id as string, toUpdate)
 
-    await companyService.create(company)
-    expect(companyService.create(duplicatedCompany)).rejects.toThrowError()
+        expect(result).not.toBe(company)
+        expect(result.name).toBe(toUpdate.name)
+      })
+
+      test('when has wrong id', async () => {
+        const { sut } = makeSut()
+        const toUpdate = { name: 'Updated' }
+
+        expect(() => sut.update('1', toUpdate)).rejects.toThrow(new CompanyNotFoundError())
+      })
+    })
   })
 
-  it('should be able to list all companies', async () => {
+  describe('when delete company', () => {
+    describe('should delete company', () => {
+      test('when success', async () => {
+        const { sut } = makeSut()
+        const company = makeFakeCompany()
+        await sut.create(company)
 
-    await companyService.create(company)
-    await companyService.create(anotherCompany)
+        await sut.delete(company.id as string)
 
-    expect(companyService.readAll()).resolves.toBeInstanceOf(Array<Company>)
-  })
+        expect((await sut.readAll()).length).toBe(0)
+      })
 
-  it('should be able a list a company by id', async () => {
-    await companyService.create(company)
+      test('when has wrong id', async () => {
+        const { sut } = makeSut()
+        const fakeId = '999'
 
-    expect(companyService.read(company.id as string)).resolves.toBeInstanceOf(Company)
-  })
-
-  it('should be able to update a company', async () => {
-
-    await companyService.create(company)
-    const updatedCompany = await companyService.update('1', new Company({ name: 'Grafica' }))
-
-    expect(updatedCompany).toBeInstanceOf(Company)
-    expect(updatedCompany.name).toBe('Grafica')
-  })
-
-  it('should not be able to update a company tryng pass diferent id', async () => {
-
-    await companyService.create(company)
-    const updatedCompany = await companyService.update('1', new Company({ id: '2', name: 'Grafica' }))
-
-    expect(updatedCompany).toBeInstanceOf(Company)
+        expect(() => sut.delete(fakeId)).rejects.toThrow(new CompanyNotFoundError())
+      })
+    })
   })
 })

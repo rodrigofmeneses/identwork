@@ -1,28 +1,34 @@
 import { Company } from "../entities/company"
 import { CompanyRepository } from "../repositories/company.repository"
+import { NotFoundError } from "../repositories/errors/NotFoundError"
 import { InMemoryCompanyRepository } from "../repositories/in-memory/in-memory.company.repository"
+import { CompanyNotFoundError } from "./errors/CompanyNotFoundError"
+import { DuplicatedCompanyError } from "./errors/DuplicatedCompanyError"
 import { Service } from "./service"
 
-interface CreateCompanyRequest {
-  name: string
-}
-
-interface CreateCompanyResponse {
-  id: number
-  name: string
-}
 
 export class CompanyService implements Service<Company, string> {
+  companyRepository: CompanyRepository
   constructor(
-    private companyRepository: CompanyRepository = new InMemoryCompanyRepository()
-  ) { }
+    repository?: CompanyRepository
+  ) {
+    this.companyRepository = repository ?? new InMemoryCompanyRepository()
+  }
 
   async readAll(): Promise<Company[]> {
     return this.companyRepository.readAll()
   }
 
   async read(id: string): Promise<Company> {
-    return this.companyRepository.read(id)
+    try {
+      const result = await this.companyRepository.read(id)
+      return result
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw new CompanyNotFoundError()
+      }
+      throw error
+    }
   }
 
   async create(company: Company): Promise<Company> {
@@ -30,7 +36,7 @@ export class CompanyService implements Service<Company, string> {
 
     companies.forEach(repCompany => {
       if (repCompany.name === company.name) {
-        throw new Error('Invalid duplicated')
+        throw new DuplicatedCompanyError()
       }
     })
 
@@ -39,10 +45,12 @@ export class CompanyService implements Service<Company, string> {
   }
 
   async update(id: string, company: Company): Promise<Company> {
+    await this.read(id)
     return this.companyRepository.update(id, company)
   }
 
   async delete(id: string): Promise<Company> {
+    await this.read(id)
     return this.companyRepository.delete(id)
   }
 }
