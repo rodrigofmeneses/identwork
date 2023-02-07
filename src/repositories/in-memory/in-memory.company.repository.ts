@@ -1,6 +1,6 @@
 import { Company } from "../../entities/company";
 import { CompanyRepository } from "../company.repository";
-import { NotFoundError } from "../error/NotFoundError";
+import { NotFoundError } from "../errors/NotFoundError";
 
 export class InMemoryCompanyRepository implements CompanyRepository {
   public items: Company[] = []

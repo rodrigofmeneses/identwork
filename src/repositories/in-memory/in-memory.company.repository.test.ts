@@ -1,6 +1,6 @@
-import { describe, expect, it, test } from "vitest";
+import { describe, expect, test } from "vitest";
 import { makeFakeCompany } from "../../entities/mocks/company";
-import { NotFoundError } from "../error/NotFoundError";
+import { NotFoundError } from "../errors/NotFoundError";
 import { InMemoryCompanyRepository } from "./in-memory.company.repository";
 
 
@@ -33,7 +33,7 @@ describe('in memory companies repository', () => {
     expect(sut.items[1].name).toBe(anotherCompany.name)
   })
 
-  it('may update a company by id', async () => {
+  test('may update a company by id', async () => {
     const { sut } = makeSut()
     const company = makeFakeCompany()
     const updateCompany = { name: 'UPDATE' }
@@ -47,7 +47,7 @@ describe('in memory companies repository', () => {
   test('may delete a company by id', async () => {
     const { sut } = makeSut()
     const company = makeFakeCompany()
-    const createdCompany = await sut.save(company)
+    await sut.save(company)
 
     await sut.delete(company.id as string)
 
