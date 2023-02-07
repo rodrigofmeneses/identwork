@@ -7,26 +7,27 @@ export class InMemoryCompanyRepository implements CompanyRepository {
   index = 0
 
   private findById(id: string): Company {
-    const company = this.items.find(item => item.id === id)
-    if (!company) {
+    const result = this.items.find(item => item.id === id)
+    if (!result) {
       throw new NotFoundError()
     }
-    return company
+    return { ...result }
   }
 
   async readAll(): Promise<Company[]> {
-    return this.items
+    return [...this.items]
   }
 
   async read(id: string): Promise<Company> {
-    const company = this.findById(id)
-    return company
+    const result = this.findById(id)
+    return { ...result }
   }
 
   async create(company: Company): Promise<Company> {
-    company.id = String(this.index)
+    const result = { ...company }
+    result.id = String(this.index)
     this.index++
-    return company
+    return { ...result }
   }
 
   async update(id: string, company: Partial<Company>): Promise<Company> {
@@ -35,20 +36,22 @@ export class InMemoryCompanyRepository implements CompanyRepository {
     const result = { ...companyDatabase, ...company }
     this.items[index] = result
 
-    return result
+    return { ...result }
   }
 
   async delete(id: string): Promise<Company> {
     const company = this.findById(id)
     const index = this.items.indexOf(company)
+    const result = { ...this.items.splice(index, 1)[0] }
 
-    return this.items.splice(index, 1)[0]
+    return { ...result }
   }
 
   async save(company: Company): Promise<Company> {
-    company.id = String(this.index)
+    const result = { ...company }
+    result.id = String(this.index)
     this.index++
-    this.items.push(company)
-    return company
+    this.items.push(result)
+    return { ...result }
   }
 }

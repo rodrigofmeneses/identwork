@@ -67,13 +67,12 @@ describe('Company Service', () => {
         const { sut } = makeSut()
         const company = makeFakeCompany()
         const anotherCompany = makeFakeCompany({ name: 'Gráfica' })
-
         await sut.create(company)
-        await sut.create(anotherCompany)
+        const createdAnotherCompany = await sut.create(anotherCompany)
 
-        const result = await sut.read(anotherCompany.id as string)
+        const result = await sut.read(createdAnotherCompany.id as string)
 
-        expect(result).toBe(anotherCompany)
+        expect(result.name).toBe(createdAnotherCompany.name)
       })
 
       test('when has no company or id', async () => {
@@ -91,11 +90,10 @@ describe('Company Service', () => {
         const { sut } = makeSut()
         const company = makeFakeCompany()
         const toUpdate = { name: 'Updated' }
-        await sut.create(company)
+        const createdCompany = await sut.create(company)
 
-        const result = await sut.update(company.id as string, toUpdate)
+        const result = await sut.update(createdCompany.id as string, toUpdate)
 
-        expect(result).not.toBe(company)
         expect(result.name).toBe(toUpdate.name)
       })
 
@@ -113,9 +111,9 @@ describe('Company Service', () => {
       test('when success', async () => {
         const { sut } = makeSut()
         const company = makeFakeCompany()
-        await sut.create(company)
+        const createdCompany = await sut.create(company)
 
-        await sut.delete(company.id as string)
+        await sut.delete(createdCompany.id as string)
 
         expect((await sut.readAll()).length).toBe(0)
       })

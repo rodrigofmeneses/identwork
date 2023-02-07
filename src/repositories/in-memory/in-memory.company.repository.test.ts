@@ -14,10 +14,13 @@ describe('in memory companies repository', () => {
   test('may create a company', async () => {
     const { sut } = makeSut()
     const company = makeFakeCompany()
+    const anotherCompany = makeFakeCompany({ name: 'Gráfica' })
 
     const result = await sut.create(company)
+    const anotherResult = await sut.create(anotherCompany)
 
-    expect(result).toBe(company)
+    expect(result.name).toBe(company.name)
+    expect(anotherResult.name).toBe(anotherCompany.name)
   })
 
   test('may save companies', async () => {
@@ -37,9 +40,9 @@ describe('in memory companies repository', () => {
     const { sut } = makeSut()
     const company = makeFakeCompany()
     const updateCompany = { name: 'UPDATE' }
-    const createdCompany = await sut.save(company)
+    await sut.save(company)
 
-    const result = await sut.update(createdCompany.id as string, updateCompany)
+    const result = await sut.update('0', updateCompany)
 
     expect(result.name).toBe(updateCompany.name)
   })
@@ -47,9 +50,9 @@ describe('in memory companies repository', () => {
   test('may delete a company by id', async () => {
     const { sut } = makeSut()
     const company = makeFakeCompany()
-    await sut.save(company)
+    const createdCompany = await sut.save(company)
 
-    await sut.delete(company.id as string)
+    await sut.delete(createdCompany.id as string)
 
     expect(sut.items.length).toBe(0)
   })
