@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
+import 'express-async-errors';
 import { CompanyService } from "../services/company.service";
+import { NotFoundError } from "../shared/api-errors";
 
 interface CreateCompanyRequest {
   id?: string
@@ -19,55 +21,44 @@ export class CompanyController {
   }
 
   async create(req: Request, res: Response) {
-    try {
-      const validBody: CreateCompanyRequest = req.body
-
-      const newCompany = await this.companyService.create(validBody)
-
-      return res.status(201).json(newCompany)
-    } catch (error) {
-      console.log(error)
-      res.status(500).json({ message: 'Internal Server Error' })
-    }
+    const validBody: CreateCompanyRequest = req.body
+    const newCompany = await this.companyService.create(validBody)
+    return res.status(201).json(newCompany)
   }
 
-  async readAll(req: Request, res: Response) {
-    try {
-      const result = await this.companyService.readAll()
-      res.json(result)
-    } catch (error) {
-      res.status(500).json({ message: 'Internal Server Error' })
-    }
+  async findAll(req: Request, res: Response) {
+    const result = await this.companyService.findAll()
+    res.json(result)
   }
 
-  async read(req: Request, res: Response) {
-    try {
-      const { id } = req.params
-      const result = await this.companyService.read(id)
-      res.json(result)
-    } catch (error) {
-      res.status(500).json({ message: 'Internal Server Error' })
+  async find(req: Request, res: Response) {
+    const { id } = req.params
+    const result = await this.companyService.find(id)
+    if (!await this.companyService.find(id)) {
+      throw new NotFoundError('Company not found')
     }
+    res.json(result)
   }
 
   async update(req: Request, res: Response) {
-    try {
-      const validBody: UpdateCompanyRequest = req.body
-      const { id } = req.params
-      const result = await this.companyService.update(id, validBody)
-      res.json(result)
-    } catch (error) {
-      res.status(500).json({ message: 'Internal Server Error' })
+    const validBody: UpdateCompanyRequest = req.body
+    const { id } = req.params
+
+    if (!await this.companyService.find(id)) {
+      throw new NotFoundError('Company not found')
     }
+    const result = await this.companyService.update(id, validBody)
+    res.json(result)
   }
 
   async delete(req: Request, res: Response) {
-    try {
-      const { id } = req.params
-      const result = await this.companyService.delete(id)
-      res.json(result)
-    } catch (error) {
-      res.status(500).json({ message: 'Internal Server Error' })
+    const { id } = req.params
+
+    if (!await this.companyService.find(id)) {
+      throw new NotFoundError('Company not found')
     }
+
+    const result = await this.companyService.delete(id)
+    res.json(result)
   }
 }
