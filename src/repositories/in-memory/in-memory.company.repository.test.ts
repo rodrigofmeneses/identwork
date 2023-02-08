@@ -40,9 +40,9 @@ describe('in memory companies repository', () => {
     const { sut } = makeSut()
     const company = makeFakeCompany()
     const updateCompany = { name: 'UPDATE' }
-    await sut.save(company)
+    const repositoryCompany = await sut.save(company)
 
-    const result = await sut.update('0', updateCompany)
+    const result = await sut.update(repositoryCompany.id as string, updateCompany)
 
     expect(result.name).toBe(updateCompany.name)
   })

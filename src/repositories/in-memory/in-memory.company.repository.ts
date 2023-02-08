@@ -1,10 +1,11 @@
+import { v4 as uuid } from 'uuid';
 import { Company } from "../../entities/company";
 import { CompanyRepository } from "../company.repository";
 import { NotFoundError } from "../errors/NotFoundError";
 
+
 export class InMemoryCompanyRepository implements CompanyRepository {
   public items: Company[] = []
-  index = 0
 
   private findById(id: string): Company {
     const result = this.items.find(item => item.id === id)
@@ -25,8 +26,7 @@ export class InMemoryCompanyRepository implements CompanyRepository {
 
   async create(company: Company): Promise<Company> {
     const result = { ...company }
-    result.id = String(this.index)
-    this.index++
+    result.id = uuid()
     return { ...result }
   }
 
@@ -49,8 +49,7 @@ export class InMemoryCompanyRepository implements CompanyRepository {
 
   async save(company: Company): Promise<Company> {
     const result = { ...company }
-    result.id = String(this.index)
-    this.index++
+    result.id = uuid()
     this.items.push(result)
     return { ...result }
   }
