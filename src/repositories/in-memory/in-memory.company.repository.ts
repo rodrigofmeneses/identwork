@@ -32,7 +32,7 @@ export class InMemoryCompanyRepository implements CompanyRepository {
 
   async update(id: string, company: Partial<Company>): Promise<Company> {
     const companyDatabase = this.findById(id)
-    const index = this.items.indexOf(companyDatabase)
+    const index = this.items.findIndex(item => item.id === companyDatabase.id)
     const result = { ...companyDatabase, ...company }
     this.items[index] = result
 
@@ -40,8 +40,8 @@ export class InMemoryCompanyRepository implements CompanyRepository {
   }
 
   async delete(id: string): Promise<Company> {
-    const company = this.findById(id)
-    const index = this.items.indexOf(company)
+    const companyDatabase = this.findById(id)
+    const index = this.items.findIndex(item => item.id === companyDatabase.id)
     const result = { ...this.items.splice(index, 1)[0] }
 
     return { ...result }
