@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { makeFakeCompany } from "../../entities/mocks/company";
-import { NotFoundError } from "../errors/NotFoundError";
+import { ResourceNotFoundError } from "../errors/EntityNotFoundError";
 import { InMemoryCompanyRepository } from "./in-memory.company.repository";
 
 
@@ -62,6 +62,6 @@ describe('in memory companies repository', () => {
     const company = makeFakeCompany()
     const createdCompany = await sut.save(company)
 
-    expect(sut.delete(createdCompany.id + '1' as string)).rejects.toThrow(new NotFoundError())
+    expect(sut.delete(createdCompany.id + '1' as string)).rejects.toThrow(new ResourceNotFoundError())
   })
 })

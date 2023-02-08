@@ -1,6 +1,5 @@
 import { Company } from "../entities/company"
 import { CompanyRepository } from "../repositories/company.repository"
-import { NotFoundError } from "../repositories/errors/NotFoundError"
 import { PrismaRepository } from "../repositories/prisma/prisma.company.repository"
 import { CompanyNotFoundError } from "./errors/CompanyNotFoundError"
 import { DuplicatedCompanyError } from "./errors/DuplicatedCompanyError"
@@ -15,24 +14,17 @@ export class CompanyService implements Service<Company, string> {
     this.companyRepository = repository ?? new PrismaRepository()
   }
 
-  async readAll(): Promise<Company[]> {
-    return this.companyRepository.readAll()
+  async findAll(): Promise<Company[]> {
+    return this.companyRepository.findAll()
   }
 
-  async read(id: string): Promise<Company> {
-    try {
-      const result = await this.companyRepository.read(id)
-      return result
-    } catch (error) {
-      if (error instanceof NotFoundError) {
-        throw new CompanyNotFoundError()
-      }
-      throw error
-    }
+  async find(id: string): Promise<Company | null> {
+    const result = await this.companyRepository.find(id)
+    return result
   }
 
   async create(company: Company): Promise<Company> {
-    const companies = await this.companyRepository.readAll()
+    const companies = await this.companyRepository.findAll()
 
     companies.forEach(repCompany => {
       if (repCompany.name === company.name) {
@@ -45,12 +37,20 @@ export class CompanyService implements Service<Company, string> {
   }
 
   async update(id: string, company: Partial<Company>): Promise<Company> {
-    await this.read(id)
-    return this.companyRepository.update(id, company)
+    try {
+      const result = await this.companyRepository.update(id, company)
+      return result
+    } catch (error) {
+      throw new CompanyNotFoundError()
+    }
   }
 
   async delete(id: string): Promise<Company> {
-    await this.read(id)
-    return this.companyRepository.delete(id)
+    try {
+      const result = await this.companyRepository.delete(id)
+      return result
+    } catch (error) {
+      throw new CompanyNotFoundError()
+    }
   }
 }

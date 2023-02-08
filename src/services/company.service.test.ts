@@ -23,8 +23,8 @@ describe('Company Service', () => {
         await sut.create(company)
         await sut.create(anotherCompany)
 
-        expect(sut.readAll()).resolves.toBeInstanceOf(Array<Company>)
-        expect((await sut.readAll()).length).toBe(2)
+        expect(sut.findAll()).resolves.toBeInstanceOf(Array<Company>)
+        expect((await sut.findAll()).length).toBe(2)
       })
 
       test('should be not able to create a company with duplicated name', async () => {
@@ -39,7 +39,7 @@ describe('Company Service', () => {
     })
   })
 
-  describe('when read companies', () => {
+  describe('when find companies', () => {
     describe('should list all companies', () => {
       test('when success', async () => {
         const { sut } = makeSut()
@@ -48,7 +48,7 @@ describe('Company Service', () => {
         await sut.create(company)
         await sut.create(anotherCompany)
 
-        const result = await sut.readAll()
+        const result = await sut.findAll()
 
         expect(result.length).toBe(2)
       })
@@ -56,7 +56,7 @@ describe('Company Service', () => {
       test('when there is no company', async () => {
         const { sut } = makeSut()
 
-        const result = await sut.readAll()
+        const result = await sut.findAll()
 
         expect(result.length).toBe(0)
       })
@@ -70,7 +70,7 @@ describe('Company Service', () => {
         await sut.create(company)
         const createdAnotherCompany = await sut.create(anotherCompany)
 
-        const result = await sut.read(createdAnotherCompany.id as string)
+        const result = await sut.find(createdAnotherCompany.id as string) as Company
 
         expect(result.name).toBe(createdAnotherCompany.name)
       })
@@ -79,7 +79,9 @@ describe('Company Service', () => {
         const { sut } = makeSut()
         const fakeId = '999'
 
-        expect(() => sut.read(fakeId)).rejects.toThrow(new CompanyNotFoundError())
+        const result = await sut.find(fakeId)
+
+        expect(result).toBeNull()
       })
     })
   })
@@ -100,8 +102,9 @@ describe('Company Service', () => {
       test('when has wrong id', async () => {
         const { sut } = makeSut()
         const toUpdate = { name: 'Updated' }
+        const fakeId = '999'
 
-        expect(() => sut.update('1', toUpdate)).rejects.toThrow(new CompanyNotFoundError())
+        expect(() => sut.update(fakeId, toUpdate)).rejects.toThrow(new CompanyNotFoundError())
       })
     })
   })
@@ -115,7 +118,7 @@ describe('Company Service', () => {
 
         await sut.delete(createdCompany.id as string)
 
-        expect((await sut.readAll()).length).toBe(0)
+        expect((await sut.findAll()).length).toBe(0)
       })
 
       test('when has wrong id', async () => {

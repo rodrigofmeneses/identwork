@@ -2,24 +2,19 @@ import { PrismaClient } from "@prisma/client";
 import { v4 as uuid } from 'uuid';
 import { Company } from "../../entities/company";
 import { CompanyNotFoundError } from "../../services/errors/CompanyNotFoundError";
+import { NotFoundError } from "../errors/EntityNotFoundError";
 import { Repository } from "../repository";
 
 export class PrismaRepository implements Repository<Company, string> {
   prisma = new PrismaClient()
 
-  async readAll(): Promise<Company[]> {
+  async findAll(): Promise<Company[]> {
     return this.prisma.company.findMany()
   }
-  async read(id: string): Promise<Company> {
-    const result = await this.prisma.company.findUnique({
+  async find(id: string): Promise<Company | null> {
+    return this.prisma.company.findUnique({
       where: { id: id }
     })
-
-    if (!result) {
-      throw new CompanyNotFoundError()
-    }
-
-    return result
   }
 
   async create(company: Company): Promise<Company> {
@@ -35,7 +30,11 @@ export class PrismaRepository implements Repository<Company, string> {
   }
 
   async update(id: string, company: Partial<Company>): Promise<Company> {
-    await this.read(id)
+    const result = await this.find(id)
+    if (!result) {
+      throw new NotFoundError()
+    }
+
     return this.prisma.company.update({
       where: { id },
       data: company
@@ -43,7 +42,11 @@ export class PrismaRepository implements Repository<Company, string> {
   }
 
   async delete(id: string): Promise<Company> {
-    await this.read(id)
+    const result = await this.find(id)
+    if (!result) {
+      throw new CompanyNotFoundError()
+    }
+
     return this.prisma.company.delete({
       where: { id }
     })
