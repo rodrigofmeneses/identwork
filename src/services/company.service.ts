@@ -1,7 +1,7 @@
 import { Company } from "../entities/company"
 import { CompanyRepository } from "../repositories/company.repository"
 import { NotFoundError } from "../repositories/errors/NotFoundError"
-import { InMemoryCompanyRepository } from "../repositories/in-memory/in-memory.company.repository"
+import { PrismaRepository } from "../repositories/prisma/prisma.company.repository"
 import { CompanyNotFoundError } from "./errors/CompanyNotFoundError"
 import { DuplicatedCompanyError } from "./errors/DuplicatedCompanyError"
 import { Service } from "./service"
@@ -12,7 +12,7 @@ export class CompanyService implements Service<Company, string> {
   constructor(
     repository?: CompanyRepository
   ) {
-    this.companyRepository = repository ?? new InMemoryCompanyRepository()
+    this.companyRepository = repository ?? new PrismaRepository()
   }
 
   async readAll(): Promise<Company[]> {
@@ -44,7 +44,7 @@ export class CompanyService implements Service<Company, string> {
     return this.companyRepository.save(newCompany)
   }
 
-  async update(id: string, company: Company): Promise<Company> {
+  async update(id: string, company: Partial<Company>): Promise<Company> {
     await this.read(id)
     return this.companyRepository.update(id, company)
   }
