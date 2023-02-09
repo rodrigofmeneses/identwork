@@ -1,7 +1,7 @@
 import { v4 as uuid } from 'uuid';
 import { Company } from "../../entities/company";
+import { CompanyNotFoundError } from '../../services/errors/CompanyNotFoundError';
 import { CompanyRepository } from "../company.repository";
-import { ResourceNotFoundError } from '../errors/EntityNotFoundError';
 
 
 export class InMemoryCompanyRepository implements CompanyRepository {
@@ -25,7 +25,7 @@ export class InMemoryCompanyRepository implements CompanyRepository {
   async update(id: string, company: Partial<Company>): Promise<Company> {
     const companyDatabase = await this.find(id)
     if (!companyDatabase) {
-      throw new ResourceNotFoundError()
+      throw new CompanyNotFoundError()
     }
     const index = this.items.findIndex(item => item.id === companyDatabase.id)
     const result = { ...companyDatabase, ...company }
@@ -36,7 +36,7 @@ export class InMemoryCompanyRepository implements CompanyRepository {
   async delete(id: string): Promise<Company> {
     const companyDatabase = await this.find(id)
     if (!companyDatabase) {
-      throw new ResourceNotFoundError()
+      throw new CompanyNotFoundError()
     }
     const index = this.items.findIndex(item => item.id === companyDatabase.id)
     const result = { ...this.items.splice(index, 1)[0] }

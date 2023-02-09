@@ -1,12 +1,10 @@
 import { Company } from "../entities/company"
 import { CompanyRepository } from "../repositories/company.repository"
 import { PrismaRepository } from "../repositories/prisma/prisma.company.repository"
-import { CompanyNotFoundError } from "./errors/CompanyNotFoundError"
-import { DuplicatedCompanyError } from "./errors/DuplicatedCompanyError"
-import { Service } from "./service"
+import { BadRequestError, NotFoundError } from "../shared/api-errors"
 
 
-export class CompanyService implements Service<Company, string> {
+export class CompanyService {
   companyRepository: CompanyRepository
   constructor(
     repository?: CompanyRepository
@@ -27,8 +25,8 @@ export class CompanyService implements Service<Company, string> {
     const companies = await this.companyRepository.findAll()
 
     companies.forEach(repCompany => {
-      if (repCompany.name === company.name) {
-        throw new DuplicatedCompanyError()
+      if (repCompany.name === company.name || repCompany.id === company.id) {
+        throw new BadRequestError('Invalid create company with duplicated name or id')
       }
     })
 
@@ -41,7 +39,7 @@ export class CompanyService implements Service<Company, string> {
       const result = await this.companyRepository.update(id, company)
       return result
     } catch (error) {
-      throw new CompanyNotFoundError()
+      throw new NotFoundError('Company not found')
     }
   }
 
@@ -50,7 +48,7 @@ export class CompanyService implements Service<Company, string> {
       const result = await this.companyRepository.delete(id)
       return result
     } catch (error) {
-      throw new CompanyNotFoundError()
+      throw new NotFoundError('Company not found')
     }
   }
 }

@@ -2,9 +2,8 @@ import { describe, expect, test } from "vitest";
 import { Company } from "../entities/company";
 import { makeFakeCompany } from "../entities/mocks/company";
 import { InMemoryCompanyRepository } from "../repositories/in-memory/in-memory.company.repository";
+import { BadRequestError } from "../shared/api-errors";
 import { CompanyService } from "./company.service";
-import { CompanyNotFoundError } from "./errors/CompanyNotFoundError";
-import { DuplicatedCompanyError } from "./errors/DuplicatedCompanyError";
 
 const makeSut = () => {
   const sut = new CompanyService(new InMemoryCompanyRepository())
@@ -34,7 +33,7 @@ describe('Company Service', () => {
 
         await sut.create(company)
 
-        expect(() => sut.create(duplicatedCompany)).rejects.toThrow(new DuplicatedCompanyError())
+        expect(() => sut.create(duplicatedCompany)).rejects.toThrow(new BadRequestError('Invalid create company with duplicated name or id'))
       })
     })
   })
@@ -104,7 +103,7 @@ describe('Company Service', () => {
         const toUpdate = { name: 'Updated' }
         const fakeId = '999'
 
-        expect(() => sut.update(fakeId, toUpdate)).rejects.toThrow(new CompanyNotFoundError())
+        expect(() => sut.update(fakeId, toUpdate)).rejects.toThrow(new BadRequestError('Company not found'))
       })
     })
   })
@@ -125,7 +124,7 @@ describe('Company Service', () => {
         const { sut } = makeSut()
         const fakeId = '999'
 
-        expect(() => sut.delete(fakeId)).rejects.toThrow(new CompanyNotFoundError())
+        expect(() => sut.delete(fakeId)).rejects.toThrow(new BadRequestError('Company not found'))
       })
     })
   })
