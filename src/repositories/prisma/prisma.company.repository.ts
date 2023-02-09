@@ -2,8 +2,8 @@ import { PrismaClient } from "@prisma/client";
 import { v4 as uuid } from 'uuid';
 import { Company } from "../../entities/company";
 import { CompanyNotFoundError } from "../../services/errors/CompanyNotFoundError";
-import { NotFoundError } from "../errors/EntityNotFoundError";
 import { Repository } from "../repository";
+
 
 export class PrismaRepository implements Repository<Company, string> {
   prisma = new PrismaClient()
@@ -32,7 +32,7 @@ export class PrismaRepository implements Repository<Company, string> {
   async update(id: string, company: Partial<Company>): Promise<Company> {
     const result = await this.find(id)
     if (!result) {
-      throw new NotFoundError()
+      throw new CompanyNotFoundError()
     }
 
     return this.prisma.company.update({
