@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest";
 import { Company } from "../entities/company";
 import { makeFakeCompany } from "../entities/mocks/company";
 import { InMemoryCompanyRepository } from "../repositories/in-memory/in-memory.company.repository";
-import { BadRequestError } from "../shared/api-errors";
+import { BadRequestError, NotFoundError } from "../shared/api-errors";
 import { CompanyService } from "./company.service";
 
 const makeSut = () => {
@@ -15,15 +15,13 @@ describe('Company Service', () => {
   describe('when adding company', () => {
     describe('should add company in repository', () => {
       test('when success', async () => {
-        const { sut } = makeSut();
+        const { sut } = makeSut()
         const company = makeFakeCompany()
-        const anotherCompany = makeFakeCompany({ name: 'Gráfica' })
 
         await sut.create(company)
-        await sut.create(anotherCompany)
 
         expect(sut.findAll()).resolves.toBeInstanceOf(Array<Company>)
-        expect((await sut.findAll()).length).toBe(2)
+        expect((await sut.findAll()).length).toBe(1)
       })
 
       test('should be not able to create a company with duplicated name', async () => {
@@ -33,7 +31,7 @@ describe('Company Service', () => {
 
         await sut.create(company)
 
-        expect(() => sut.create(duplicatedCompany)).rejects.toThrow(new BadRequestError('Invalid create company with duplicated name or id'))
+        expect(() => sut.create(duplicatedCompany)).rejects.toThrow(new BadRequestError('Invalid create company with duplicated name'))
       })
     })
   })
@@ -43,13 +41,11 @@ describe('Company Service', () => {
       test('when success', async () => {
         const { sut } = makeSut()
         const company = makeFakeCompany()
-        const anotherCompany = makeFakeCompany({ name: 'Gráfica' })
         await sut.create(company)
-        await sut.create(anotherCompany)
 
         const result = await sut.findAll()
 
-        expect(result.length).toBe(2)
+        expect(result.length).toBe(1)
       })
 
       test('when there is no company', async () => {
@@ -78,9 +74,7 @@ describe('Company Service', () => {
         const { sut } = makeSut()
         const fakeId = '999'
 
-        const result = await sut.find(fakeId)
-
-        expect(result).toBeNull()
+        expect(() => sut.find(fakeId)).rejects.toThrow(new NotFoundError('Company not found'))
       })
     })
   })

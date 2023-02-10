@@ -5,7 +5,7 @@ export const CreateCompanySchema = z.object({
 }).strict();
 
 export const UpdateCompanySchema = z.object({
-  name: z.string().optional(),
+  name: z.string()
 }).strict();
 
 export type CreateCompanyRequest = z.infer<typeof CreateCompanySchema>;

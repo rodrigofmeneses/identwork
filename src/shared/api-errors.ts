@@ -20,11 +20,20 @@ export class NotFoundError extends ApiError {
 }
 
 export class BadRequestError extends ApiError {
-  /** Not Found Error
+  /** Bad Request Error
    *
    */
   constructor(message: string) {
     super(message, 400)
+  }
+}
+
+export class ConflictError extends ApiError {
+  /** Conflict Error
+   *
+   */
+  constructor(message: string) {
+    super(message, 409)
   }
 }
 
