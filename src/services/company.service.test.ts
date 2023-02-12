@@ -1,5 +1,4 @@
 import { describe, expect, test } from "vitest";
-import { Company } from "../entities/company";
 import { makeFakeCompany } from "../entities/mocks/company";
 import { InMemoryCompanyRepository } from "../repositories/in-memory/in-memory.company.repository";
 import { BadRequestError, NotFoundError } from "../shared/api-errors";
@@ -65,7 +64,7 @@ describe('Company Service', () => {
         await sut.create(company)
         const createdAnotherCompany = await sut.create(anotherCompany)
 
-        const result = await sut.find(createdAnotherCompany.id as string) as Company
+        const result = await sut.find(createdAnotherCompany.id)
 
         expect(result.name).toBe(createdAnotherCompany.name)
       })
@@ -84,20 +83,25 @@ describe('Company Service', () => {
       test('when success', async () => {
         const { sut } = makeSut()
         const company = makeFakeCompany()
-        const toUpdate = { name: 'Updated' }
-        const createdCompany = await sut.create(company)
+        const toUpdate = makeFakeCompany({ ...company, name: 'Updated' })
 
-        const result = await sut.update(createdCompany.id as string, toUpdate)
+        const result = await sut.update(company.id, toUpdate)
 
         expect(result.name).toBe(toUpdate.name)
       })
 
+    })
+
+    describe('should create a new company', () => {
       test('when has wrong id', async () => {
         const { sut } = makeSut()
-        const toUpdate = { name: 'Updated' }
-        const fakeId = '999'
+        const toUpdate = makeFakeCompany({ name: 'Updated' })
 
-        expect(() => sut.update(fakeId, toUpdate)).rejects.toThrow(new BadRequestError('Company not found'))
+        const result = await sut.update(toUpdate.id, toUpdate)
+
+        // expect(() => sut.update(fakeId, toUpdate)).rejects.toThrow(new BadRequestError('Company not found'))
+        expect(result).toEqual(toUpdate)
+        // expect(result.id).toBe(toUpdate.id)
       })
     })
   })
@@ -109,7 +113,7 @@ describe('Company Service', () => {
         const company = makeFakeCompany()
         const createdCompany = await sut.create(company)
 
-        await sut.delete(createdCompany.id as string)
+        await sut.delete(createdCompany.id)
 
         expect((await sut.findAll()).length).toBe(0)
       })

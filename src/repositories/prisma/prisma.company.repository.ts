@@ -1,10 +1,9 @@
-import { PrismaClient } from "@prisma/client";
+import { Company, PrismaClient } from "@prisma/client";
 import { v4 as uuid } from 'uuid';
-import { Company } from "../../entities/company";
 import { Repository } from "../repository";
 
 
-export class PrismaRepository implements Repository<Company, string> {
+export class PrismaCompanyRepository implements Repository<Company, string> {
   prisma = new PrismaClient()
 
   async findAll(): Promise<Company[]> {
@@ -18,7 +17,9 @@ export class PrismaRepository implements Repository<Company, string> {
 
   async create(company: Company): Promise<Company> {
     const result = { ...company }
-    result.id = uuid()
+    if (!company.id) {
+      result.id = uuid()
+    }
     return result
   }
 

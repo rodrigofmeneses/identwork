@@ -1,7 +1,6 @@
-import { Company } from "../entities/company"
+import { Company } from "@prisma/client"
 import { CompanyRepository } from "../repositories/company.repository"
-import { PrismaRepository } from "../repositories/prisma/prisma.company.repository"
-import { CreateCompanyRequest, UpdateCompanyRequest } from "../schemas/company.schema"
+import { PrismaCompanyRepository } from "../repositories/prisma/prisma.company.repository"
 import { ConflictError, NotFoundError } from "../shared/api-errors"
 
 
@@ -10,7 +9,7 @@ export class CompanyService {
   constructor(
     repository?: CompanyRepository
   ) {
-    this.companyRepository = repository ?? new PrismaRepository()
+    this.companyRepository = repository ?? new PrismaCompanyRepository()
   }
 
   async findAll(): Promise<Company[]> {
@@ -25,7 +24,7 @@ export class CompanyService {
     return result
   }
 
-  async create(company: CreateCompanyRequest): Promise<Company> {
+  async create(company: Company): Promise<Company> {
     const companies = await this.companyRepository.findAll()
 
     companies.forEach(repCompany => {
@@ -38,9 +37,10 @@ export class CompanyService {
     return this.companyRepository.save(newCompany)
   }
 
-  async update(id: string, company: UpdateCompanyRequest): Promise<Company> {
+  async update(id: string, company: Company): Promise<Company> {
     if (!await this.companyRepository.find(id)) {
-      throw new NotFoundError('Company not found')
+      company.id = id
+      return this.create(company)
     }
 
     const companies = await this.companyRepository.findAll()

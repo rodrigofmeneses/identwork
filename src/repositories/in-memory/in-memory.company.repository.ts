@@ -1,5 +1,5 @@
+import { Company } from '@prisma/client';
 import { v4 as uuid } from 'uuid';
-import { Company } from "../../entities/company";
 import { CompanyNotFoundError } from '../../services/errors/CompanyNotFoundError';
 import { CompanyRepository } from "../company.repository";
 
@@ -18,7 +18,9 @@ export class InMemoryCompanyRepository implements CompanyRepository {
 
   async create(company: Company): Promise<Company> {
     const result = { ...company }
-    result.id = uuid()
+    if (!company.id) {
+      result.id = uuid()
+    }
     return { ...result }
   }
 
@@ -44,8 +46,7 @@ export class InMemoryCompanyRepository implements CompanyRepository {
   }
 
   async save(company: Company): Promise<Company> {
-    const result = { ...company }
-    result.id = uuid()
+    const result = await this.create(company)
     this.items.push(result)
     return { ...result }
   }
