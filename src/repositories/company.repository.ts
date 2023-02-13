@@ -2,4 +2,4 @@
 import { Company } from "../entities/company";
 import { Repository } from "./repository";
 
-export interface CompanyRepository extends Repository<Company, string> { }
+export interface CompanyRepository extends Repository<Company, Company> { }

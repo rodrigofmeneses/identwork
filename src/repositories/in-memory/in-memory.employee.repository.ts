@@ -1,10 +1,20 @@
-import { Employee } from '../../entities/employee';
+
+import { Employee, EmployeeRequest } from '../../entities/employee';
+import { CompanyNotFoundError } from '../../services/errors/CompanyNotFoundError';
+import { EmployeeNotFoundError } from '../../services/errors/EmployeeNotFoundError';
 import { EmployeeRepository } from '../employee.repository';
-import { ResourceNotFoundError } from '../errors/EntityNotFoundError';
+import { InMemoryCompanyRepository } from './in-memory.company.repository';
 
 
 export class InMemoryEmployeeRepository implements EmployeeRepository {
-  public items: Employee[] = []
+  items: Employee[] = []
+  companyRepository: InMemoryCompanyRepository
+
+  constructor(
+    companyRepository?: InMemoryCompanyRepository
+  ) {
+    this.companyRepository = companyRepository ?? new InMemoryCompanyRepository()
+  }
 
   async findAll(): Promise<Employee[]> {
     return [...this.items]
@@ -15,34 +25,37 @@ export class InMemoryEmployeeRepository implements EmployeeRepository {
     return result
   }
 
-  async create(employee: Employee): Promise<Employee> {
-    const result = { ...employee }
-    return { ...result }
+  async create(employee: EmployeeRequest): Promise<Employee> {
+    const { company_id, ...rest } = employee
+    const company = await this.companyRepository.find(company_id)
+
+    if (!company) {
+      throw new CompanyNotFoundError()
+    }
+    return { company, ...rest }
   }
 
-  async update(id: string, employee: Partial<Employee>): Promise<Employee> {
-    const employeeDatabase = await this.find(id)
-    if (!employeeDatabase) {
-      throw new ResourceNotFoundError()
+  async update(id: string, employee: EmployeeRequest): Promise<Employee> {
+    const result = await this.find(id)
+    if (!result) {
+      throw new EmployeeNotFoundError()
     }
-    const index = this.items.findIndex(item => item.id === employeeDatabase.id)
-    const result = { ...employeeDatabase, ...employee }
-    this.items[index] = result
-    return { ...result }
+    const index = this.items.findIndex(item => item.id === result.id)
+    this.items[index] = { ...result, ...employee }
+    return { ...this.items[index] }
   }
 
   async delete(id: string): Promise<Employee> {
-    const employeeDatabase = await this.find(id)
-    if (!employeeDatabase) {
-      throw new ResourceNotFoundError()
+    const result = await this.find(id)
+    if (!result) {
+      throw new EmployeeNotFoundError()
     }
-    const index = this.items.findIndex(item => item.id === employeeDatabase.id)
-    const result = { ...this.items.splice(index, 1)[0] }
-    return { ...result }
+    const index = this.items.findIndex(item => item.id === result.id)
+    return { ...this.items.splice(index, 1)[0] }
   }
 
-  async save(employee: Employee): Promise<Employee> {
-    const result = { ...employee }
+  async save(employee: EmployeeRequest): Promise<Employee> {
+    const result = await this.create(employee)
     this.items.push(result)
     return { ...result }
   }

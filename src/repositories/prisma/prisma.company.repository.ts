@@ -1,9 +1,10 @@
-import { Company, PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { v4 as uuid } from 'uuid';
-import { Repository } from "../repository";
+import { Company } from "../../entities/company";
+import { CompanyRepository } from "../company.repository";
 
 
-export class PrismaCompanyRepository implements Repository<Company, string> {
+export class PrismaCompanyRepository implements CompanyRepository {
   prisma = new PrismaClient()
 
   async findAll(): Promise<Company[]> {

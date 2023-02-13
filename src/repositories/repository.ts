@@ -1,8 +1,8 @@
 export interface Repository<T, K> {
-  findAll(): Promise<T[]>;
-  find(id: K): Promise<T | null>;
-  create(entity: T): Promise<T>;
-  save(entity: T): Promise<T>;
-  update(id: K, entity: Partial<T>): Promise<T>;
-  delete(id: K): Promise<T>;
+  findAll(): Promise<K[]>;
+  find(id: string): Promise<K | null>;
+  create(entity: T): Promise<K>;
+  save(entity: T): Promise<K>;
+  update(id: string, entity: Partial<T>): Promise<K>;
+  delete(id: string): Promise<K>;
 }

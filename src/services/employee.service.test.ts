@@ -1,23 +1,28 @@
 import { describe, expect, test } from "vitest";
 import { Employee } from "../entities/employee";
-import { makeFakeEmployee } from "../entities/mocks/employee";
+import { makeFakeCompany } from "../entities/mocks/company";
+import { makeFakeRequestEmployee } from "../entities/mocks/employee";
+import { InMemoryCompanyRepository } from "../repositories/in-memory/in-memory.company.repository";
 import { InMemoryEmployeeRepository } from "../repositories/in-memory/in-memory.employee.repository";
+import { BadRequestError, ConflictError, NotFoundError } from "../shared/api-errors";
 import { EmployeeService } from "./employee.service";
-import { DuplicatedEmployeeError } from "./errors/DuplicatedEmployeeError";
-import { EmployeeNotFoundError } from "./errors/EmployeeNotFoundError";
 
-const makeSut = () => {
-  const sut = new EmployeeService(new InMemoryEmployeeRepository())
+const makeSut = async () => {
+  const companyRepository = new InMemoryCompanyRepository()
+  await companyRepository.save(makeFakeCompany({ id: '123' }))
+  const employeeRepository = new InMemoryEmployeeRepository(companyRepository)
+
+  const sut = new EmployeeService(employeeRepository, companyRepository)
 
   return { sut };
 }
 
 describe('Employee Service', () => {
-  describe('when adding employee', () => {
+  describe('when adding a employee', () => {
     describe('should add employee in repository', () => {
       test('when success', async () => {
-        const { sut } = makeSut();
-        const employee = makeFakeEmployee()
+        const { sut } = await makeSut()
+        const employee = makeFakeRequestEmployee()
 
         await sut.create(employee)
 
@@ -26,33 +31,20 @@ describe('Employee Service', () => {
       })
 
       test('should be not able to create a employee with duplicated id', async () => {
-        const { sut } = makeSut()
-        const employee = makeFakeEmployee({ id: '123' })
-        const duplicatedEmployee = makeFakeEmployee({ id: '123' })
-
+        const { sut } = await makeSut()
+        const employee = makeFakeRequestEmployee()
+        const duplicatedEmployee = makeFakeRequestEmployee()
         await sut.create(employee)
 
-        expect(() => sut.create(duplicatedEmployee)).rejects.toThrow(new DuplicatedEmployeeError())
+        expect(() => sut.create(duplicatedEmployee)).rejects.toThrow(new ConflictError('Invalid create employee with duplicated id'))
       })
     })
   })
 
   describe('when find employees', () => {
     describe('should list all employees', () => {
-      test('when success', async () => {
-        const { sut } = makeSut()
-        const employee = makeFakeEmployee()
-        const anotherEmployee = makeFakeEmployee({ id: '123' })
-        await sut.create(employee)
-        await sut.create(anotherEmployee)
-
-        const result = await sut.findAll()
-
-        expect(result.length).toBe(2)
-      })
-
-      test('when there is no employees', async () => {
-        const { sut } = makeSut()
+      test('when there is no employee', async () => {
+        const { sut } = await makeSut()
 
         const result = await sut.findAll()
 
@@ -62,33 +54,20 @@ describe('Employee Service', () => {
 
     describe('should list a employee by id', () => {
       test('when success', async () => {
-        const { sut } = makeSut()
-        const employee = makeFakeEmployee()
+        const { sut } = await makeSut()
+        const employee = makeFakeRequestEmployee()
         await sut.create(employee)
 
-        const result = await sut.find(employee.id as string) as Employee
+        const result = await sut.find(employee.id)
 
         expect(result.name).toBe(employee.name)
       })
 
-      test('when has no employee', async () => {
-        const { sut } = makeSut()
+      test('when has no company or id', async () => {
+        const { sut } = await makeSut()
         const fakeId = '999'
 
-        const result = await sut.find(fakeId)
-
-        expect(result).toBeNull()
-      })
-
-      test('when wrong id', async () => {
-        const { sut } = makeSut()
-        const employee = makeFakeEmployee()
-        await sut.create(employee)
-        const fakeId = '999'
-
-        const result = await sut.find(fakeId)
-
-        expect(result).toBeNull()
+        expect(() => sut.find(fakeId)).rejects.toThrow(new NotFoundError('Employee not found'))
       })
     })
   })
@@ -96,22 +75,23 @@ describe('Employee Service', () => {
   describe('when update employee', () => {
     describe('should update employee', () => {
       test('when success', async () => {
-        const { sut } = makeSut()
-        const employee = makeFakeEmployee()
+        const { sut } = await makeSut()
+        const employee = makeFakeRequestEmployee()
         const toUpdate = { name: 'Updated' }
-        await sut.create(employee)
 
-        const result = await sut.update(employee.id as string, toUpdate)
+        const result = await sut.update(employee.id, { ...employee, ...toUpdate })
 
         expect(result.name).toBe(toUpdate.name)
       })
 
-      test('when has wrong id', async () => {
-        const { sut } = makeSut()
-        const toUpdate = { name: 'Updated' }
+      test('when has wrong id may create a new employee', async () => {
+        const { sut } = await makeSut()
         const fakeId = '999'
 
-        expect(() => sut.update(fakeId, toUpdate)).rejects.toThrow(new EmployeeNotFoundError())
+        const result = await sut.update(fakeId, makeFakeRequestEmployee())
+        const employees = await sut.findAll()
+
+        expect((await sut.findAll()).length).toBe(1)
       })
     })
   })
@@ -119,20 +99,20 @@ describe('Employee Service', () => {
   describe('when delete employee', () => {
     describe('should delete employee', () => {
       test('when success', async () => {
-        const { sut } = makeSut()
-        const employee = makeFakeEmployee()
+        const { sut } = await makeSut()
+        const employee = makeFakeRequestEmployee()
         await sut.create(employee)
 
-        await sut.delete(employee.id as string)
+        await sut.delete(employee.id)
 
         expect((await sut.findAll()).length).toBe(0)
       })
 
       test('when has wrong id', async () => {
-        const { sut } = makeSut()
+        const { sut } = await makeSut()
         const fakeId = '999'
 
-        expect(() => sut.delete(fakeId)).rejects.toThrow(new EmployeeNotFoundError())
+        expect(() => sut.delete(fakeId)).rejects.toThrow(new BadRequestError('Employee not found'))
       })
     })
   })
