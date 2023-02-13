@@ -1,4 +1,5 @@
 import { Company } from "../entities/company"
+import { Employee } from "../entities/employee"
 import { CompanyRepository } from "../repositories/company.repository"
 import { PrismaCompanyRepository } from "../repositories/prisma/prisma.company.repository"
 import { ConflictError, NotFoundError } from "../shared/api-errors"
@@ -22,6 +23,10 @@ export class CompanyService {
       throw new NotFoundError('Company not found')
     }
     return result
+  }
+
+  async findAllEmployees(id: string): Promise<Employee[]> {
+    return this.companyRepository.findAllEmployees(id)
   }
 
   async create(company: Company): Promise<Company> {
@@ -51,6 +56,10 @@ export class CompanyService {
     })
 
     return this.companyRepository.update(id, company)
+  }
+
+  async toPrint(id: string, company: Company): Promise<Company> {
+    return this.companyRepository.toPrint(id, company)
   }
 
   async delete(id: string): Promise<Company> {

@@ -33,6 +33,13 @@ export class CompanyController {
     return res.json(result)
   }
 
+  async findAllEmployeesByCompany(req: Request, res: Response) {
+    const { id } = req.params
+
+    const result = await this.companyService.findAllEmployees(id)
+    return res.json(result)
+  }
+
   async update(req: Request, res: Response) {
     const body = req.body
     const { id } = req.params

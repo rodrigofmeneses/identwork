@@ -1,10 +1,14 @@
 import { Company } from '@prisma/client';
 import { v4 as uuid } from 'uuid';
+import { Employee } from '../../entities/employee';
 import { CompanyNotFoundError } from '../../services/errors/CompanyNotFoundError';
 import { CompanyRepository } from "../company.repository";
 
 
 export class InMemoryCompanyRepository implements CompanyRepository {
+  findAllEmployees(id: string): Promise<Employee[]> {
+    throw new Error('Method not implemented.');
+  }
   public items: Company[] = []
 
   async findAll(): Promise<Company[]> {

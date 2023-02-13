@@ -7,6 +7,7 @@ const companyController = new CompanyController()
 
 router.get('/', companyController.findAll.bind(companyController))
 router.get('/:id', companyController.find.bind(companyController))
+router.get('/:id/employees', companyController.findAllEmployeesByCompany.bind(companyController))
 router.post('/', companyController.create.bind(companyController))
 router.put('/:id', companyController.update.bind(companyController))
 router.delete('/:id', companyController.delete.bind(companyController))
