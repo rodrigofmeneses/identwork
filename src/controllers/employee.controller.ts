@@ -38,6 +38,13 @@ export class EmployeeController {
     res.json(result)
   }
 
+  async print(req: Request, res: Response) {
+    const { id } = req.params
+
+    const result = await this.employeeService.print(id)
+    res.json(result)
+  }
+
   async delete(req: Request, res: Response) {
     const { id } = req.params
 
