@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest";
+import { Company } from "../entities/company";
 import { makeFakeCompany } from "../entities/mocks/company";
 import { InMemoryCompanyRepository } from "../repositories/in-memory/in-memory.company.repository";
 import { BadRequestError, NotFoundError } from "../shared/api-errors";
@@ -64,7 +65,7 @@ describe('Company Service', () => {
         await sut.create(company)
         const createdAnotherCompany = await sut.create(anotherCompany)
 
-        const result = await sut.find(createdAnotherCompany.id)
+        const result = await sut.find(createdAnotherCompany.id as string)
 
         expect(result.name).toBe(createdAnotherCompany.name)
       })
@@ -99,7 +100,6 @@ describe('Company Service', () => {
 
         const result = await sut.update(toUpdate.id, toUpdate)
 
-        // expect(() => sut.update(fakeId, toUpdate)).rejects.toThrow(new BadRequestError('Company not found'))
         expect(result).toEqual(toUpdate)
         // expect(result.id).toBe(toUpdate.id)
       })
@@ -113,7 +113,7 @@ describe('Company Service', () => {
         const company = makeFakeCompany()
         const createdCompany = await sut.create(company)
 
-        await sut.delete(createdCompany.id)
+        await sut.delete(createdCompany.id as string)
 
         expect((await sut.findAll()).length).toBe(0)
       })

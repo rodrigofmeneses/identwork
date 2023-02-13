@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import 'express-async-errors';
-import { CreateCompanyRequest, CreateCompanySchema, UpdateCompanyRequest, UpdateCompanySchema } from "../schemas/company.schema";
+import { CreateCompanySchema, UpdateCompanySchema } from "../schemas/company.schema";
 import { CompanyService } from "../services/company.service";
 
 
@@ -13,10 +13,11 @@ export class CompanyController {
   }
 
   async create(req: Request, res: Response) {
-    const validBody: CreateCompanyRequest = req.body
-    await CreateCompanySchema.parseAsync(validBody)
+    const body = req.body
+    await CreateCompanySchema.parseAsync(body)
 
-    const newCompany = await this.companyService.create(validBody)
+    const newCompany = await this.companyService.create(body)
+
     return res.status(201).json(newCompany)
   }
 
@@ -33,12 +34,12 @@ export class CompanyController {
   }
 
   async update(req: Request, res: Response) {
-    const validBody: UpdateCompanyRequest = req.body
+    const body = req.body
     const { id } = req.params
-    await UpdateCompanySchema.parseAsync(validBody)
+    await UpdateCompanySchema.parseAsync(body)
 
-    const result = await this.companyService.update(id, validBody)
-    return res.json(result)
+    const result = await this.companyService.update(id, body)
+    return res.status(201).json(result)
   }
 
   async delete(req: Request, res: Response) {

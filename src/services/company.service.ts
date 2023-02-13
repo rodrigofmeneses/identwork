@@ -1,4 +1,4 @@
-import { Company } from "@prisma/client"
+import { Company } from "../entities/company"
 import { CompanyRepository } from "../repositories/company.repository"
 import { PrismaCompanyRepository } from "../repositories/prisma/prisma.company.repository"
 import { ConflictError, NotFoundError } from "../shared/api-errors"
