@@ -4,22 +4,23 @@ import { CompanyNotFoundError } from "../../services/errors/CompanyNotFoundError
 import { EmployeeRepository } from "../employee.repository";
 
 
-const response = {
-  id: true,
-  name: true,
-  war_name: true,
-  admission_date: true,
-  company: true,
-  identification: true,
-  print: true,
-  role: true,
-}
-
 export class PrismaEmployeeRepository implements EmployeeRepository {
   private prisma = new PrismaClient()
 
   async findAll(): Promise<Employee[]> {
     const result = await this.prisma.employee.findMany({ include: { company: true } })
+    return result.map(employee => {
+      const { company_id, ...rest } = employee
+      return rest
+    })
+  }
+
+  async findAllEmployeesByCompanyId(id: string): Promise<Employee[]> {
+    const result = await this.prisma.employee.findMany({
+      where: { company_id: id },
+      include: { company: true }
+    })
+
     return result.map(employee => {
       const { company_id, ...rest } = employee
       return rest
@@ -60,6 +61,18 @@ export class PrismaEmployeeRepository implements EmployeeRepository {
     return this.prisma.employee.update({
       where: { id },
       data: employee,
+      include: { company: true }
+    })
+  }
+
+  async changeToPrint(id: string): Promise<Employee> {
+    const result = await this.prisma.employee.findUnique({
+      where: { id }
+    })
+
+    return this.prisma.employee.update({
+      where: { id },
+      data: { print: !result?.print },
       include: { company: true }
     })
   }

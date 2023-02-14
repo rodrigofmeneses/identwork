@@ -61,6 +61,14 @@ export class EmployeeService {
     return this.employeeRepository.update(id, employee)
   }
 
+  async print(id: string): Promise<Employee> {
+    if (!await this.employeeRepository.find(id)) {
+      throw new BadRequestError('Invalid employee id')
+    }
+
+    return this.employeeRepository.changeToPrint(id)
+  }
+
   async delete(id: string): Promise<Employee> {
     if (!await this.employeeRepository.find(id)) {
       throw new NotFoundError('Employee not found')
