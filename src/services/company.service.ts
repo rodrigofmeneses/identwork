@@ -1,16 +1,21 @@
 import { Company } from "../entities/company"
 import { Employee } from "../entities/employee"
 import { CompanyRepository } from "../repositories/company.repository"
+import { EmployeeRepository } from "../repositories/employee.repository"
 import { PrismaCompanyRepository } from "../repositories/prisma/prisma.company.repository"
+import { PrismaEmployeeRepository } from "../repositories/prisma/prisma.employee.repository"
 import { ConflictError, NotFoundError } from "../shared/api-errors"
 
 
 export class CompanyService {
   companyRepository: CompanyRepository
+  employeeRepository: EmployeeRepository
   constructor(
-    repository?: CompanyRepository
+    companyRepository?: CompanyRepository,
+    employeeRepository?: EmployeeRepository
   ) {
-    this.companyRepository = repository ?? new PrismaCompanyRepository()
+    this.companyRepository = companyRepository ?? new PrismaCompanyRepository()
+    this.employeeRepository = employeeRepository ?? new PrismaEmployeeRepository()
   }
 
   async findAll(): Promise<Company[]> {
@@ -26,7 +31,7 @@ export class CompanyService {
   }
 
   async findAllEmployees(id: string): Promise<Employee[]> {
-    return this.companyRepository.findAllEmployees(id)
+    return this.employeeRepository.findAllEmployeesByCompanyId(id)
   }
 
   async create(company: Company): Promise<Company> {
