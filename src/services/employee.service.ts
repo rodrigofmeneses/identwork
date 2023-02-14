@@ -21,6 +21,10 @@ export class EmployeeService {
     return this.employeeRepository.findAll()
   }
 
+  async findAllEmployeesToPrint(): Promise<Employee[]> {
+    return this.employeeRepository.findAllEmployeesToPrint()
+  }
+
   async find(id: string): Promise<Employee> {
     const result = await this.employeeRepository.find(id)
     if (!result) {

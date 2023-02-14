@@ -30,6 +30,10 @@ export class EmployeeController {
     return res.json(result)
   }
 
+  async findAllEmployeesToPrint(req: Request, res: Response) {
+    return res.json(await this.employeeService.findAllEmployeesToPrint())
+  }
+
   async update(req: Request, res: Response) {
     const validBody = await CreateEmployeeSchema.parseAsync(req.body)
     const { id } = req.params

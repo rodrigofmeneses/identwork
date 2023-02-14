@@ -15,6 +15,17 @@ export class PrismaEmployeeRepository implements EmployeeRepository {
     })
   }
 
+  async findAllEmployeesToPrint(): Promise<Employee[]> {
+    const result = await this.prisma.employee.findMany({
+      where: { print: true },
+      include: { company: true }
+    })
+    return result.map(employee => {
+      const { company_id, ...rest } = employee
+      return rest
+    })
+  }
+
   async findAllEmployeesByCompanyId(id: string): Promise<Employee[]> {
     const result = await this.prisma.employee.findMany({
       where: { company_id: id },

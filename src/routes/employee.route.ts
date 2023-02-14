@@ -6,6 +6,7 @@ const router = express.Router()
 const employeeController = new EmployeeController()
 
 router.get('/', employeeController.findAll.bind(employeeController))
+router.get('/print', employeeController.findAllEmployeesToPrint.bind(employeeController))
 router.get('/:id', employeeController.find.bind(employeeController))
 router.post('/', employeeController.create.bind(employeeController))
 router.put('/:id', employeeController.update.bind(employeeController))
