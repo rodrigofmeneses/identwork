@@ -63,10 +63,6 @@ export class CompanyService {
     return this.companyRepository.update(id, company)
   }
 
-  async toPrint(id: string, company: Company): Promise<Company> {
-    return this.companyRepository.toPrint(id, company)
-  }
-
   async delete(id: string): Promise<Company> {
     if (!await this.companyRepository.find(id)) {
       throw new NotFoundError('Company not found')
