@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "vitest",
-    "start": "tsx watch --inspect src/server.ts"
+    "dev": "tsx watch --inspect src/server.ts"
   },
   "keywords": [],
   "author": "",
@@ -16,15 +16,16 @@
     "@types/uuid": "^9.0.0",
     "@typescript-eslint/eslint-plugin": "^5.49.0",
     "@typescript-eslint/parser": "^5.49.0",
+    "@vitest/coverage-c8": "^0.28.5",
     "eslint": "^8.33.0",
     "prettier": "^2.8.3",
-    "prisma": "^4.9.0",
+    "prisma": "^4.10.1",
     "supertest": "^6.3.3",
     "tsx": "^3.12.2",
     "vitest": "^0.28.3"
   },
   "dependencies": {
-    "@prisma/client": "^4.9.0",
+    "@prisma/client": "^4.10.1",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "express-async-errors": "^3.1.1",
