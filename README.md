@@ -1,5 +1,7 @@
 # Manage your employees with IdentWork
 
+![IdentWork Logo](assets/identwork-logo.jpg)
+
 > ResFull API to manage employees and companies. This project arose from a need of store employee data for a freelance job of making ID Card. From there this api is the backend for the application.
 ---
 ## Technologies used
@@ -28,7 +30,7 @@ PORT=7777
 ---
 ## Migrations
 ```
-npx prisma migrate
+npx prisma migrate dev
 ```
 ---
 ## Usage
